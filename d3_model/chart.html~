@@ -1,0 +1,160 @@
+<html>
+  <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+    <style>
+      body {
+      background-color: #D3D3D3;
+      }
+      svg {
+      background-color: #D3D3D3;
+      }
+      div.tooltip {
+      position: absolute;
+      text-align: center;
+      width: 60px;
+      height: 28px;
+      padding: 2px;
+      font: 12px sans-serif;
+      background: lightsteelblue;
+      border: 0px;
+      border-radius: 8px;
+      pointer-events: none;
+      }
+      rect {
+      fill: #D3D3D3;
+      }
+      circle {
+      opacity: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>2015 Festivals</h1>
+    <button onclick="isolateFest(0)">Noise Pop</button>
+    <button onclick="isolateFest(1)">SXSW</button>
+    <button onclick="isolateFest(2)">Ultra</button>
+    <button onclick="isolateFest(3)">Coachella</button>
+    <button onclick="isolateFest(4)">Beale Street</button>
+    <button onclick="isolateFest(5)">Hangout</button>
+    <button onclick="isolateFest(6)">Sasquatch!</button>
+    <button onclick="isolateFest(7)">Governors Ball</button>
+    <button onclick="isolateFest(8)">Bonnaroo</button>
+    <button onclick="isolateFest(9)">Austin City Limits</button>
+    <br><br>
+    <script>
+      d3.select("body").append("svg").attr({"width":1200, "height": 50, "id": "svg1"});
+      var legend = d3.select("#svg1");
+      console.log(legend);
+      var c20 = d3.scale.category20();
+      console.log(c20);
+      legend.selectAll("circle").data(Array(15)).enter().append("circle").attr("r", 10).attr("cx", function(d, i) {return i * 50 + 10;}).attr("cy", 25).attr("fill", function(d, i) {return c20(i);});
+
+      d3.select("body").append("svg").attr({"width": 1200, "height": 540, "id": "svg2"});
+      
+      var dataset;
+
+      var height = 20, width = 20;
+
+      var div = d3.select('body').append('div').attr('class', 'tooltip').style('opacity', 0);
+
+      var svg;
+
+      var festivals = ["Noise Pop", "SXSW", "Ultra", 
+      "Coachella", "Beale Street", "Hangout", 
+      "Sasquatch!", "Governors Ball", "Bonnaroo", "Austin City Limits"];
+      
+      var fest_codes = ["noi_2015", "sxs_2015", "ult_2015", "coa_2015", 
+      "bea_2015", "han_2015", "sas_2015", "gba_2015", "bon_2015", "acl_2015"];
+      
+
+      function isolateFest(fest) {
+      var artists = svg.selectAll("circle");
+      var fest_no_goers_c = artists.filter(function(d) {
+      if (fest == 0) {return Number(d.noi_2015) == 0} 
+      else if (fest == 1) {return Number(d.sxs_2015) == 0;}
+      else if (fest == 2) {return Number(d.ult_2015) == 0;}
+      else if (fest == 3) {return Number(d.coa_2015) == 0;}
+      else if (fest == 4) {return Number(d.bea_2015) == 0;}
+      else if (fest == 5) {return Number(d.han_2015) == 0;}
+      else if (fest == 6) {return Number(d.sas_2015) == 0;}
+      else if (fest == 7) {return Number(d.gba_2015) == 0;}
+      else if (fest == 8) {return Number(d.bon_2015) == 0;}
+      else if (fest == 9) {return Number(d.acl_2015) == 0;}
+      ;});
+      var backdrops = svg.selectAll("rect");
+      var fest_no_goers_r = backdrops.filter(function(d) {
+      if (fest == 0) {return Number(d.noi_2015) == 0} 
+      else if (fest == 1) {return Number(d.sxs_2015) == 0;}
+      else if (fest == 2) {return Number(d.ult_2015) == 0;}
+      else if (fest == 3) {return Number(d.coa_2015) == 0;}
+      else if (fest == 4) {return Number(d.bea_2015) == 0;}
+      else if (fest == 5) {return Number(d.han_2015) == 0;}
+      else if (fest == 6) {return Number(d.sas_2015) == 0;}
+      else if (fest == 7) {return Number(d.gba_2015) == 0;}
+      else if (fest == 8) {return Number(d.bon_2015) == 0;}
+      else if (fest == 9) {return Number(d.acl_2015) == 0;}
+      ;});
+      fest_no_goers_c.attr("showing", function(){if (this.attributes.showing.value == 'true') {return 'false';} else {return 'true';}});
+      fest_no_goers_r.attr("showing", function(){if (this.attributes.showing.value == 'true') {return 'false';} else {return 'true';}});
+      var selected = fest_no_goers_c[0][0];
+      var opac = selected.style.opacity;
+      fest_no_goers_c.transition().duration(1500).style("opacity", 1 - opac);
+      };
+
+      d3.tsv("mybetterdf.tsv", function(error, data) {
+      if (error) {
+      console.log(error);
+      } else {
+
+      console.log(data);
+
+      dataset = data.sort(function(a, b) {
+      return Number(b.fans) - Number(a.fans);});
+
+      svg = d3.select("#svg2")
+
+      var fanmap = d3.scale
+      .linear()
+      .domain([d3.min(dataset, function(d) {return Number(d.fans);}), 
+      d3.max(dataset, function(d) {return Number(d.fans);})])
+      .range([2.0, 10]);
+      
+      svg.selectAll("rect")
+      .data(dataset)
+      .enter()
+      .append("rect")
+      .attr("x", function(d, i) { return 20 * (i % 60);})
+      .attr("y", function(d, i) { return 15 * Math.floor(i / 60);})
+      .attr("width", width)
+      .attr("height", height)
+      .attr("showing", true)
+      .on('mouseover', function(d, i) {if (this.attributes.showing.value === 'true'){
+      div.transition().duration(200).style('opacity', .9);
+      div.html(d.artist).style('left', (d3.event.pageX) + "px").style('top', (d3.event.pageY) + 'px');
+      } else {}})
+      .on('mouseout', function(d) { if (this.attributes.showing.value === 'true') {
+      div.transition().duration(500).style('opacity', 0);} else {}});
+
+      circles = svg.selectAll("circle")
+      .data(dataset)
+      .enter()
+      .append("circle")
+      .style("opacity", 1)
+      .attr("r", function(d) {return fanmap(Number(d.fans));})
+      .attr("cx", function(d, i) {return 20*(i % 60) + 10})
+      .attr("cy", function(d, i) {return 15*Math.floor(i / 60) + 10})
+      .attr("fill", function(d) {return c20(d.genre_pick);})
+      .attr("showing", true)
+      .on('mouseover', function(d, i) {console.log(typeof(this.attributes.showing.value));if (this.attributes.showing.value === 'true') {div.transition().duration(200).style('opacity', .9);
+      div.html(d.artist).style('left', (d3.event.pageX) + "px").style('top', (d3.event.pageY) + 'px');
+      } else {}})
+      .on('mouseout', function(d) {if (this.attributes.showing.value === 'true') {
+      div.transition().duration(500).style('opacity', 0);} else {}});
+      }
+      });
+		     
+		      
+		      
+    </script>
+  </body>
+</html>
